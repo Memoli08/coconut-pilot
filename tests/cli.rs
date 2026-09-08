@@ -28,12 +28,18 @@ fn absent_config_does_not_write() {
 #[test]
 fn invalid_config_is_preserved() {
     let d = tempfile::tempdir().unwrap();
-    fs::create_dir(d.path().join("coconut")).unwrap();
-    let p = d.path().join("coconut/config.toml");
+    let config_dir = if cfg!(target_os = "windows") {
+        d.path().join("CoconutPilot")
+    } else {
+        d.path().join("coconut")
+    };
+    fs::create_dir(&config_dir).unwrap();
+    let p = config_dir.join("config.toml");
     fs::write(&p, "version = 999\n").unwrap();
     let o = coconut()
         .arg("disable")
         .env("XDG_CONFIG_HOME", d.path())
+        .env("APPDATA", d.path())
         .output()
         .unwrap();
     assert!(!o.status.success());
