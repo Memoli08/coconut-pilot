@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest a concrete improvement to Coconut Pilot.
+title: "feature: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What workflow is difficult today?
+      placeholder: "When I press the Copilot key, I need..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Explain what Coconut should do and on which platform.
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Relevant platform
+      options:
+        - Linux
+        - Windows
+        - Both
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional. Describe any workaround or similar tool you tried.
+

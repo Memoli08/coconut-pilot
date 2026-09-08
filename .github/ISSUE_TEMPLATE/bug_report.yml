@@ -1,0 +1,62 @@
+name: Bug report
+description: Report reproducible Coconut Pilot behavior.
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not post passwords, tokens, private URLs or personal paths.
+        Security vulnerabilities belong in a private security advisory.
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Linux
+        - Windows 10
+        - Windows 11
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Coconut version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Desktop environment or Windows build
+      placeholder: "Hyprland on CachyOS, or Windows 11 23H2"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run coconut
+        2. Select ...
+        3. Press Copilot
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Sanitized diagnostics
+      description: Paste the relevant output from coconut doctor or coconut status.
+      render: text
+

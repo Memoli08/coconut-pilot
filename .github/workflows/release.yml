@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  linux-build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: sudo apt-get update && sudo apt-get install -y build-essential dpkg-dev pkg-config libglib2.0-dev
+      - run: |
+          cargo fmt --check
+          cargo clippy --locked --all-targets -- -D warnings
+          cargo test --locked
+          ./packaging/release-bundle.sh
+          ./packaging/source-dist.sh
+          ./packaging/build-deb.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-release-assets
+          path: dist/*
+          if-no-files-found: error
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - shell: pwsh
+        run: |
+          cargo fmt --check
+          cargo clippy --locked --all-targets -- -D warnings
+          cargo test --locked
+          cargo build --release --locked
+          & target/release/coconut.exe input-self-test
+          $agent = Start-Process -FilePath target/release/coconut.exe -ArgumentList 'agent' -PassThru -WindowStyle Hidden
+          Start-Sleep -Seconds 1
+          if ($agent.HasExited) { throw 'The Windows input agent exited before its hook smoke test completed.' }
+          Stop-Process -Id $agent.Id -Force
+          $agent.WaitForExit()
+          ./packaging/release-bundle.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-release-assets
+          path: dist/*.zip
+          if-no-files-found: error
+  publish:
+    needs: [linux-build, windows-build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - run: sha256sum dist/* > dist/SHA256SUMS
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --generate-notes --title "Coconut Pilot $GITHUB_REF_NAME"

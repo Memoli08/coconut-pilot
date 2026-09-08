@@ -1,0 +1,26 @@
+# Build the local source archive produced by packaging/source-dist.sh.
+pkgname=coconut-pilot
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Your keyboard, your shortcuts.'
+arch=('x86_64')
+license=('MIT')
+depends=('glib2' 'systemd' 'sudo')
+makedepends=('rust' 'pkgconf')
+optdepends=('libnotify: desktop notifications')
+source=("$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP') # Local archive; replace with its sha256sum before publishing.
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cargo build --release --locked --offline
+}
+check() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cargo test --locked --offline
+}
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+  install -Dm755 target/release/coconut "$pkgdir/usr/bin/coconut"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+}
