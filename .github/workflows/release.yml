@@ -24,7 +24,7 @@ jobs:
           ./packaging/release-bundle.sh
           ./packaging/source-dist.sh
           ./packaging/build-deb.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: linux-release-assets
           path: dist/*
@@ -49,7 +49,7 @@ jobs:
           Stop-Process -Id $agent.Id -Force
           $agent.WaitForExit()
           ./packaging/release-bundle.ps1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: windows-release-assets
           path: dist/*.zip
