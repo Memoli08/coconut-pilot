@@ -9,6 +9,10 @@ root="$stage/coconut-pilot-$version"
 mkdir -p "$root/.cargo" dist
 cp Cargo.toml Cargo.lock LICENSE README.md CHANGELOG.md CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md SUPPORT.md "$root/"
 cp -R src tests packaging assets "$root/"
+# The source archive must include target-specific crates too. Fetch them before
+# vendoring so the portable archive can later be built fully offline.
+cargo fetch --locked
+cargo fetch --locked --target x86_64-pc-windows-msvc
 cargo vendor --locked --offline "$root/vendor" > "$root/.cargo/config.toml"
 # cargo vendor emits an absolute directory when passed one; make archive relocatable.
 python3 - "$root/.cargo/config.toml" <<'PY'
