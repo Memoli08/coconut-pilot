@@ -7,8 +7,7 @@ mod linux {
     };
     use anyhow::{bail, Context, Result};
     use evdev::{
-        uinput::{VirtualDevice, VirtualDeviceBuilder},
-        AbsInfo, Device, EventType, InputEvent, Key, UinputAbsSetup,
+        uinput::VirtualDevice, AbsInfo, Device, EventType, InputEvent, KeyCode, UinputAbsSetup,
     };
     use serde::{Deserialize, Serialize};
     use std::{
@@ -181,8 +180,11 @@ mod linux {
         grabbed: bool,
         down: BTreeSet<u16>,
     }
-    fn virtual_keyboard(dev: &Device, keys: &evdev::AttributeSetRef<Key>) -> Result<VirtualDevice> {
-        let mut builder = VirtualDeviceBuilder::new()?
+    fn virtual_keyboard(
+        dev: &Device,
+        keys: &evdev::AttributeSetRef<KeyCode>,
+    ) -> Result<VirtualDevice> {
+        let mut builder = VirtualDevice::builder()?
             .name("Coconut virtual keyboard")
             .input_id(dev.input_id())
             .with_keys(keys)?;
@@ -220,7 +222,7 @@ mod linux {
             let events: Vec<_> = self
                 .down
                 .iter()
-                .map(|k| InputEvent::new(EventType::KEY, *k, 0))
+                .map(|k| InputEvent::new(EventType::KEY.0, *k, 0))
                 .collect();
             let _ = self.virtual_dev.emit(&events);
             if self.grabbed {
@@ -239,9 +241,9 @@ mod linux {
                     return None;
                 }
                 let keys = dev.supported_keys()?;
-                if !keys.contains(Key::KEY_A)
-                    && !keys.contains(Key::KEY_F23)
-                    && !keys.contains(Key::KEY_ASSISTANT)
+                if !keys.contains(KeyCode::KEY_A)
+                    && !keys.contains(KeyCode::KEY_F23)
+                    && !keys.contains(KeyCode::KEY_ASSISTANT)
                 {
                     return None;
                 }
@@ -284,7 +286,7 @@ mod linux {
                 } else if e.value == 0 {
                     k.down.remove(&e.code);
                 }
-                InputEvent::new(EventType::KEY, e.code, e.value)
+                InputEvent::new(EventType::KEY.0, e.code, e.value)
             })
             .collect();
         if !es.is_empty() {
@@ -656,18 +658,18 @@ mod linux {
                     return None;
                 }
                 let keys = dev.supported_keys()?;
-                if !keys.contains(Key::KEY_A)
-                    && !keys.contains(Key::KEY_F23)
-                    && !keys.contains(Key::KEY_ASSISTANT)
+                if !keys.contains(KeyCode::KEY_A)
+                    && !keys.contains(KeyCode::KEY_F23)
+                    && !keys.contains(KeyCode::KEY_ASSISTANT)
                 {
                     return None;
                 }
                 let input = dev.input_id();
                 let mut copilot_keys = Vec::new();
-                if keys.contains(Key::KEY_F23) {
+                if keys.contains(KeyCode::KEY_F23) {
                     copilot_keys.push("F23".to_string());
                 }
-                if keys.contains(Key::KEY_ASSISTANT) {
+                if keys.contains(KeyCode::KEY_ASSISTANT) {
                     copilot_keys.push("Assistant".to_string());
                 }
                 Some(DeviceInfo {
@@ -708,27 +710,31 @@ mod linux {
         if unsafe { libc::geteuid() } != 0 {
             bail!("Input self-test source must run as root")
         }
-        let mut keys = evdev::AttributeSet::<Key>::new();
+        let mut keys = evdev::AttributeSet::<KeyCode>::new();
         for key in [
-            Key::KEY_A,
-            Key::KEY_LEFTSHIFT,
-            Key::KEY_LEFTMETA,
-            Key::KEY_F23,
+            KeyCode::KEY_A,
+            KeyCode::KEY_LEFTSHIFT,
+            KeyCode::KEY_LEFTMETA,
+            KeyCode::KEY_F23,
         ] {
             keys.insert(key);
         }
-        let mut device = VirtualDeviceBuilder::new()?
+        let mut device = VirtualDevice::builder()?
             .name("CNP Self Test Keyboard")
             .with_keys(&keys)?
             .build()?;
         println!("Synthetic keyboard ready; emitting two Copilot-style chords in 5 seconds");
         std::thread::sleep(Duration::from_secs(5));
-        let chord = [Key::KEY_LEFTSHIFT, Key::KEY_LEFTMETA, Key::KEY_F23];
+        let chord = [
+            KeyCode::KEY_LEFTSHIFT,
+            KeyCode::KEY_LEFTMETA,
+            KeyCode::KEY_F23,
+        ];
         for attempt in 0..2 {
             device.emit(
                 &chord
                     .iter()
-                    .map(|key| InputEvent::new(EventType::KEY, key.code(), 1))
+                    .map(|key| InputEvent::new(EventType::KEY.0, key.code(), 1))
                     .collect::<Vec<_>>(),
             )?;
             std::thread::sleep(Duration::from_millis(20));
@@ -736,7 +742,7 @@ mod linux {
                 &chord
                     .iter()
                     .rev()
-                    .map(|key| InputEvent::new(EventType::KEY, key.code(), 0))
+                    .map(|key| InputEvent::new(EventType::KEY.0, key.code(), 0))
                     .collect::<Vec<_>>(),
             )?;
             if attempt == 0 {
