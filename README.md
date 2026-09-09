@@ -47,17 +47,18 @@ simply **`coconut`**.
 
 ## 🚀 Install
 
-Download the package for your operating system from
-[**GitHub Releases**](../../releases). The release includes a `SHA256SUMS`
-file for verification.
+Choose a direct download for your operating system. Each release also includes
+versioned archives, a source archive and `SHA256SUMS` for verification.
 
 ### Linux
 
-Download `coconut-pilot-<version>-linux-x86_64.tar.gz`, then:
+**[Download Coconut Pilot for Linux (x86_64)](https://github.com/Memoli08/coconut-pilot/releases/latest/download/coconut-pilot-linux-x86_64.tar.gz)**
+
+Download `coconut-pilot-linux-x86_64.tar.gz`, then:
 
 ```sh
-tar -xzf coconut-pilot-<version>-linux-x86_64.tar.gz
-cd coconut-pilot-<version>-linux-x86_64
+tar -xzf coconut-pilot-linux-x86_64.tar.gz
+cd coconut-pilot-*-linux-x86_64
 ./install.sh
 ```
 
@@ -72,7 +73,9 @@ asks for `sudo` only when it needs to install the Linux input service.
 
 ### Windows 10 / 11
 
-Download `coconut-pilot-<version>-windows-x86_64.zip`, extract it, open
+**[Download Coconut Pilot for Windows (x86_64)](https://github.com/Memoli08/coconut-pilot/releases/latest/download/coconut-pilot-windows-x86_64.zip)**
+
+Download `coconut-pilot-windows-x86_64.zip`, extract it, open
 PowerShell in the extracted folder, then run:
 
 ```powershell
