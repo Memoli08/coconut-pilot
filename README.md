@@ -316,4 +316,4 @@ MIT — see [LICENSE](LICENSE).
 
 ---
 
-<p align="center">Made with 🥥 and, of course, AI :D</p>
+<p align="center">Made with 🥥 and of course AI :D</p>
